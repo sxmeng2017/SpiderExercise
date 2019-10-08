@@ -30,7 +30,7 @@ class DouBanPipeline(object):
         self.client.close()
 
     def get_comment(self, item):
-        sql = 'SELECT * FROM comments WHERE name={} and movie_name={}'.format(item['name'], item['movie_name'])
+        sql = 'SELECT * FROM new_table WHERE name=("{0}") and movie_name=("{1}")'.format(item['name'], item['movie_name'])
         self.cursor.execute(sql)
         return self.cursor.fetchone()
 
@@ -39,7 +39,7 @@ class DouBanPipeline(object):
         values = tuple(item.values())
         fields = ','.join(keys)
         temp = ','.join(['%s'] * len(keys))
-        sql = 'INSERT INTO comments ({}) VALUES ({})'.format(fields, temp)
+        sql = 'INSERT INTO new_table ({}) VALUES ({})'.format(fields, temp)
         self.cursor.execute(sql, values)
         return self.client.commit()
 
@@ -58,7 +58,6 @@ class DouBanPipeline(object):
         return self.client.commit()
 
     def process_item(self, item, spider):
-        print('procingg')
         if isinstance(item, CommMeta):
             exist = self.get_comment(item)
             if not exist:

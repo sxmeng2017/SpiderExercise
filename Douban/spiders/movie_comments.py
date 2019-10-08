@@ -11,9 +11,6 @@ class MovieStartSpider(Spider):
     sql = 'SELECT id,url FROM start'
     cursor.execute(sql)
     start_datas = cursor.fetchall()
-    start_urls = {
-        i:j for (i,j) in start_datas
-    }
     headers = {
         'Referer': 'https://movie.douban.com/top250',
         'Host': 'movie.douban.com',
@@ -41,16 +38,17 @@ class MovieStartSpider(Spider):
                          ' __utmb=223695111.0.10.1570458235'}
 
     def start_requests(self):
-        for movie_id, url in self.start_urls:
-            yield Request(url, headers=self.headers, cookies=self.cookies)
+        for item in self.start_datas:
+            yield Request(url=item['url'], headers=self.headers, cookies=self.cookies)
 
     def parse(self, response):
+
 
         for index, each in enumerate(response.xpath('//*[@id="hot-comments"]/div')):
             item = CommMeta()
             item['name'] = each.xpath('./div/h3/span[2]/a/text()')[0].extract()
             item['movie_name'] = response.xpath('//*[@id="content"]/h1/span[1]/text()')[0].extract()
-            item['movie_rating'] = each.xpath('./div/h3/span[2]/span[2]/@class')[0].extract().split(' ')[0]
+            item['movie_rating'] = each.xpath('./div/h3/span[2]/span[2]/@class')[0].extract()[7:9]
             item['movie_time'] = each.xpath('./div/h3/span[2]/span[3]/text()')[0].extract().strip()
             item['actor'] = '/'.join([i.xpath('./span[1]/a/text()')[0].extract()
                                             for i in response.xpath('//*[@id="info"]/span[3]/span[2]')])
@@ -68,7 +66,7 @@ class MovieStartSpider(Spider):
             item = CommMeta()
             item['name'] = each.xpath('./div/h3/span[2]/a/text()')[0].extract()
             item['movie_name'] = response.xpath('//*[@id="content"]/h1/span[1]/text()')[0].extract()
-            item['movie_rating'] = each.xpath('./div/h3/span[2]/span[2]/@class')[0].extract().split(' ')[0]
+            item['movie_rating'] = each.xpath('./div/h3/span[2]/span[2]/@class')[0].extract()[7:9]
             item['movie_time'] = each.xpath('./div/h3/span[2]/span[3]/text()')[0].extract().strip()
             item['actor'] = '/'.join([i.xpath('./span[1]/a/text()')[0].extract()
                                             for i in response.xpath('//*[@id="info"]/span[3]/span[2]')])
